@@ -109,9 +109,9 @@ function gameOverAnimation(timestamp) {
         let elapsedTime = timestamp - prevAnimationTimeStamp
     
         playerX += scrollSpeed * elapsedTime * Math.tan(Math.PI/3) * playerDirection * 0.5
-        playerY += tileSize*(elapsedTime/1000)*((timestamp - animationStartTime)/1000 - 0.25)*9.81
+        playerY += scrollSpeed*(elapsedTime)*((timestamp - animationStartTime)/1000 - 0.1)*9.81
 
-        playerSize *= 1-(timestamp - animationStartTime)/50000
+        playerSize *= 1-(timestamp - animationStartTime)/10000
 
         drawBackground()
         drawTiles(currentTileIndex, map.length, lastPos)
