@@ -7,7 +7,7 @@ canvas.height = window.innerHeight
 const tileSize = canvas.height * 0.1
 let playerSize = tileSize / 4
 
-const scrollSpeed = canvas.height * tileSize / canvas.height * 0.002
+const scrollSpeed = canvas.height * tileSize / canvas.height * 0.003
 
 const map = []
 
@@ -32,8 +32,6 @@ let playerY = - playerSize/2 - tileSize/2 + y
 
 let animationStartTime 
 let prevAnimationTimeStamp
-
-let animationAlphaColor = 0
 
 let prevGameTimeStamp
 
@@ -80,21 +78,19 @@ function drawBackground() {
 }
 
 
-function drawCubes(first, last, lastPos) {
+function drawTiles(first, last, lastPos) {
     let tempPos = lastPos
     for (let i = last-1; i >= first; i--) {
-        if (i == currentTileIndex) {
-            drawCube(x + tileSize*Math.cos(Math.PI/6)*tempPos, y - tileSize*(Math.sin(Math.PI/6))*i, tileSize, "green")
-        }
-        else {
-            drawCube(x + tileSize*Math.cos(Math.PI/6)*tempPos, y - tileSize*(Math.sin(Math.PI/6))*i, tileSize, "green")
-        }
+
+        drawCube(x + tileSize*Math.cos(Math.PI/6)*tempPos, y - tileSize*(Math.sin(Math.PI/6))*i, tileSize, "green")
+
         if (map[i]) {
             tempPos--
         }
         else {
             tempPos++
         }
+
     }
 }
 
@@ -112,17 +108,15 @@ function gameOverAnimation(timestamp) {
     else {
         let elapsedTime = timestamp - prevAnimationTimeStamp
     
-        playerX += scrollSpeed * elapsedTime * Math.tan(Math.PI/3) * playerDirection
+        playerX += scrollSpeed * elapsedTime * Math.tan(Math.PI/3) * playerDirection * 0.5
         playerY += tileSize*(elapsedTime/1000)*((timestamp - animationStartTime)/1000 - 0.25)*9.81
 
-        playerSize *= 1-(timestamp - animationStartTime)/100000
+        playerSize *= 1-(timestamp - animationStartTime)/50000
 
-        console.log((timestamp - animationStartTime)/1000)
-    
         drawBackground()
-        drawCubes(currentTileIndex, map.length, lastPos)
+        drawTiles(currentTileIndex, map.length, lastPos)
         drawPlayer()
-        drawCubes(0, currentTileIndex, playerPos)
+        drawTiles(0, currentTileIndex, playerPos)
     
         prevAnimationTimeStamp = timestamp
     }
@@ -134,7 +128,7 @@ function gameOverAnimation(timestamp) {
 
 
 drawBackground()
-drawCubes(0, map.length, lastPos)
+drawTiles(0, map.length, lastPos)
 drawPlayer()
 
 window.addEventListener("keypress", () => {
@@ -167,10 +161,26 @@ function gameLoop(timestamp) {
         x -= movement
     }
     
+    // Calculate screen coords for the player and the tile it is currently standing on
 
-    // Check if the player leaves the map
-    if (playerX - playerSize*Math.sin(Math.PI/3) > x + tileSize*Math.cos(Math.PI/6)*playerPos) {
-        if (playerY + playerSize*Math.cos(Math.PI/3) < y - tileSize*(Math.sin(Math.PI/6))*currentTileIndex - tileSize*Math.sin(Math.PI/6) - (tileSize - ((playerX - playerSize*Math.sin(Math.PI/3)) - (x + tileSize*Math.cos(Math.PI/6)*playerPos)))*Math.sin(Math.PI/6)) {
+    let playerLeftBottomCornerX = playerX - playerSize*Math.sin(Math.PI/3)
+    let playerRightBottomCornerX = playerX + playerSize*Math.sin(Math.PI/3)
+    let playerBottomSideCornersY = playerY + playerSize*Math.cos(Math.PI/3)
+
+    let currentTileX = x + tileSize*Math.cos(Math.PI/6)*playerPos
+
+    let currentTileBottomSideCornersY = y - tileSize*(Math.sin(Math.PI/6))*currentTileIndex - tileSize*Math.cos(Math.PI/3)
+
+    let playerLeftBottomCornerCurrentTileOffsetX = playerLeftBottomCornerX - currentTileX
+    let playerRightBottomCornerCurrentTileOffsetX = playerRightBottomCornerX - currentTileX
+
+    let playerLeftBottomCornerLimitY = currentTileBottomSideCornersY - (tileSize - Math.abs(playerLeftBottomCornerCurrentTileOffsetX))*Math.sin(Math.PI/6)
+    let playerRightBottomCornerLimitY = currentTileBottomSideCornersY - (tileSize - Math.abs(playerRightBottomCornerCurrentTileOffsetX))*Math.sin(Math.PI/6)
+
+
+    // Check if the player falls out of the map
+    if (playerBottomSideCornersY < playerLeftBottomCornerLimitY) {
+        if (playerLeftBottomCornerCurrentTileOffsetX > 0) {
             if (map[currentTileIndex+1]) {
                 playerPos++
             }
@@ -179,9 +189,15 @@ function gameLoop(timestamp) {
             }
             currentTileIndex++
         }
+        else {
+            if (!map[currentTileIndex+1]) {
+                playerPos--
+                currentTileIndex++
+            }
+        }
     }
-    else if (playerX + playerSize*Math.sin(Math.PI/3) < x + tileSize*Math.cos(Math.PI/6)*playerPos) {
-        if (playerY + playerSize*Math.cos(Math.PI/3) < y - tileSize*(Math.sin(Math.PI/6))*currentTileIndex - tileSize*Math.sin(Math.PI/6) - (tileSize - ((x + tileSize*Math.cos(Math.PI/6)*playerPos) - (playerX + playerSize*Math.sin(Math.PI/3))))*Math.sin(Math.PI/6)) {
+    if (playerBottomSideCornersY < playerRightBottomCornerLimitY && !gameOver) {
+        if (playerRightBottomCornerCurrentTileOffsetX < 0) {
             if (!map[currentTileIndex+1]) {
                 playerPos--
             }
@@ -189,6 +205,12 @@ function gameLoop(timestamp) {
                 gameOver = true
             }
             currentTileIndex++
+        }
+        else {
+            if (map[currentTileIndex+1]) {
+                playerPos++
+                currentTileIndex++
+            }
         }
     }
 
@@ -207,7 +229,7 @@ function gameLoop(timestamp) {
     }
 
     drawBackground()
-    drawCubes(0, map.length, lastPos)
+    drawTiles(0, map.length, lastPos)
     drawPlayer()
     
     if (gameOver) {
