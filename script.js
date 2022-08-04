@@ -1,8 +1,19 @@
 const canvas = document.getElementById("canvas")
 const ctx = canvas.getContext("2d")
 
-canvas.width = window.innerHeight
+canvas.width = window.innerWidth
 canvas.height = window.innerHeight
+
+const playerColor = "orange"
+
+const tileGradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+tileGradient.addColorStop(0, "#7CFC00")
+tileGradient.addColorStop(1, "green")
+
+const backgroundGradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+backgroundGradient.addColorStop(0, "white")
+backgroundGradient.addColorStop(1, "blue")
+
 
 const tileSize = canvas.height * 0.1
 let playerSize = tileSize / 4
@@ -25,10 +36,10 @@ let playerPos = map[0] ? 1 : -1
 let playerDirection = map[1] ? 1 : -1
 
 let x = canvas.width / 2
-let y = canvas.height - tileSize*Math.sin(Math.PI/6)*(numberOfTiles/4)
+let y = canvas.height - tileSize*Math.sin(Math.PI/6)*(numberOfTiles/3)
 
 let playerX = x + tileSize*Math.cos(Math.PI/6)*playerPos
-let playerY = - playerSize/2 - tileSize/2 + y
+let playerY = y - playerSize/2 - tileSize/2
 
 let animationStartTime 
 let prevAnimationTimeStamp
@@ -37,16 +48,6 @@ let prevGameTimeStamp
 
 let gameOver = false
 let startGame = false
-
-
-const backgroundGradient = ctx.createLinearGradient(0, canvas.height, canvas.width, 0)
-backgroundGradient.addColorStop(0, "blue")
-backgroundGradient.addColorStop(1, "white")
-
-
-function mapToValue(value, minInput, maxInput, minOutput, maxOutput) {
-    return (maxOutput - minOutput)*(value - minInput) / (maxInput - minInput) + minOutput
-}
 
 
 function drawDiamond(x, y, angle, color, size) {
@@ -82,7 +83,7 @@ function drawTiles(first, last, lastPos) {
     let tempPos = lastPos
     for (let i = last-1; i >= first; i--) {
 
-        drawCube(x + tileSize*Math.cos(Math.PI/6)*tempPos, y - tileSize*(Math.sin(Math.PI/6))*i, tileSize, "green")
+        drawCube(x + tileSize*Math.cos(Math.PI/6)*tempPos, y - tileSize*(Math.sin(Math.PI/6))*i, tileSize, tileGradient)
 
         if (map[i]) {
             tempPos--
@@ -96,7 +97,7 @@ function drawTiles(first, last, lastPos) {
 
 
 function drawPlayer() {
-    drawCube(playerX, playerY, playerSize, "orange")
+    drawCube(playerX, playerY, playerSize, playerColor)
 }
 
 function gameOverAnimation(timestamp) {
