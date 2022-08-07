@@ -1,53 +1,63 @@
 const canvas = document.getElementById("canvas")
 const ctx = canvas.getContext("2d")
 
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
-
 const playerColor = "orange"
 
-const tileGradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
-tileGradient.addColorStop(0, "#7CFC00")
-tileGradient.addColorStop(1, "green")
+let enableGenerateNewMap = false
+let enableStartGame = true
+let gameOver = true
 
-const backgroundGradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
-backgroundGradient.addColorStop(0, "white")
-backgroundGradient.addColorStop(1, "blue")
+const heightTileSizeAspectRatio = 10
+const numberOfTiles = canvas.height/(canvas.height/heightTileSizeAspectRatio*Math.sin(Math.PI/6)) + 4
 
+let map, lastPos, playerPos, playerDirection, currentTileIndex
 
-const tileSize = canvas.height * 0.1
-let playerSize = tileSize / 4
-
-const scrollSpeed = canvas.height * tileSize / canvas.height * 0.003
-
-const map = []
-
-const numberOfTiles = canvas.height/(tileSize*Math.sin(Math.PI/6)) + 4
-
-let currentTileIndex = 0
-
-for (let i = 0; i < numberOfTiles; i++) {
-    map.push(Math.round(Math.random()))
+function generateNewMap() {
+    currentTileIndex = 0
+    map = []
+    for (let i = 0; i < numberOfTiles; i++) {
+        map.push(Math.round(Math.random()))
+    }
+    lastPos = map.reduce((accumulator, currentValue) => {return currentValue ? accumulator+1 : accumulator-1}, 0)
+    playerPos = map[0] ? 1 : -1
+    playerDirection = map[1] ? 1 : -1
 }
 
-let lastPos = map.reduce((accumulator, currentValue) => {return currentValue ? accumulator+1 : accumulator-1}, 0)
+generateNewMap()
 
-let playerPos = map[0] ? 1 : -1
-let playerDirection = map[1] ? 1 : -1
 
-let x = canvas.width / 2
-let y = canvas.height - tileSize*Math.sin(Math.PI/6)*(numberOfTiles/3)
+let animationStartTime, prevAnimationTimeStamp, prevGameTimeStamp
 
-let playerX = x + tileSize*Math.cos(Math.PI/6)*playerPos
-let playerY = y - playerSize/2 - tileSize/2
+let tileGradient, backgroundGradient, tileSize, playerSize, scrollSpeed, x, y, playerX, playerY
 
-let animationStartTime 
-let prevAnimationTimeStamp
+function resize() {
 
-let prevGameTimeStamp
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
 
-let gameOver = false
-let startGame = false
+    tileGradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+    tileGradient.addColorStop(0, "#7CFC00")
+    tileGradient.addColorStop(1, "green")
+
+    backgroundGradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+    backgroundGradient.addColorStop(0, "white")
+    backgroundGradient.addColorStop(1, "blue")
+
+
+    tileSize = canvas.height / heightTileSizeAspectRatio
+    playerSize = tileSize / 4
+    scrollSpeed = canvas.height * tileSize / canvas.height * 0.003
+
+
+    x = canvas.width / 2
+    y = canvas.height - tileSize*Math.sin(Math.PI/6)*(numberOfTiles/3)
+
+    playerX = x + tileSize*Math.cos(Math.PI/6)*playerPos
+    playerY = y - playerSize/2 - tileSize/2
+
+}
+
+resize()
 
 
 function drawDiamond(x, y, angle, color, size) {
@@ -100,6 +110,14 @@ function drawPlayer() {
     drawCube(playerX, playerY, playerSize, playerColor)
 }
 
+
+function drawFrame() {
+    drawBackground()
+    drawTiles(0, map.length, lastPos)
+    drawPlayer()
+}
+
+
 function gameOverAnimation(timestamp) {
 
     if (animationStartTime == undefined) {
@@ -125,22 +143,42 @@ function gameOverAnimation(timestamp) {
     if (playerY < canvas.height + playerSize) {
         requestAnimationFrame(gameOverAnimation)
     }
+    else {
+        animationStartTime = undefined
+        enableGenerateNewMap = true
+    }
 }
 
 
-drawBackground()
-drawTiles(0, map.length, lastPos)
-drawPlayer()
-
 window.addEventListener("keypress", () => {
-    if (!startGame) {
-        startGame = true
+    if (enableGenerateNewMap) {
+        enableGenerateNewMap = false
+        enableStartGame = true
+        generateNewMap()
+        resize()
+        drawFrame()
+
+    }
+    else if (enableStartGame) {
+        enableStartGame = false
+        gameOver = false
         requestAnimationFrame(gameLoop)
     }
     else if (!gameOver) {
         playerDirection *= -1
     }
 })
+
+
+window.addEventListener("resize", () => {
+    if (gameOver) {
+        resize()
+        drawFrame()
+    }
+})
+
+
+drawFrame()
 
 
 function gameLoop(timestamp) {
@@ -229,12 +267,11 @@ function gameLoop(timestamp) {
         currentTileIndex--
     }
 
-    drawBackground()
-    drawTiles(0, map.length, lastPos)
-    drawPlayer()
+    drawFrame()
     
     if (gameOver) {
         requestAnimationFrame(gameOverAnimation)
+        prevGameTimeStamp = undefined
     }
     else {
         prevGameTimeStamp = timestamp
