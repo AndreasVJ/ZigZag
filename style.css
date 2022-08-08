@@ -1,10 +1,21 @@
 body {
     background-color: rgb(50, 50, 50);
     overflow: hidden;
+    margin: 0;
+}
+
+#score {
+    position: absolute;
+    top: 3vh;
+    right: 0;
+    left: 0;
+    margin: auto;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+    font-size: 10vh;
 }
 
 #canvas {
-    position: absolute;
     top: 0;
     right: 0;
     bottom: 0;

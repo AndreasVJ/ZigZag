@@ -1,11 +1,12 @@
+const scoreElement = document.getElementById("score")
 const canvas = document.getElementById("canvas")
 const ctx = canvas.getContext("2d")
-
-const playerColor = "orange"
 
 let enableGenerateNewMap = false
 let enableStartGame = true
 let gameOver = true
+
+let score = 0
 
 const heightTileSizeAspectRatio = 10
 const numberOfTiles = canvas.height/(canvas.height/heightTileSizeAspectRatio*Math.sin(Math.PI/6)) + 4
@@ -25,8 +26,9 @@ function generateNewMap() {
 
 generateNewMap()
 
+const playerColor = "orange"
 
-let animationStartTime, prevAnimationTimeStamp, prevGameTimeStamp
+let animationStartTime, prevAnimationTimeStamp, gameStartTime, prevGameTimeStamp
 
 let tileGradient, backgroundGradient, tileSize, playerSize, scrollSpeed, x, y, playerX, playerY
 
@@ -60,7 +62,7 @@ function resize() {
 resize()
 
 
-function drawDiamond(x, y, angle, color, size) {
+function drawDiamond(x, y, angle, size, color) {
     ctx.fillStyle = color
     ctx.beginPath()
     ctx.moveTo(x, y)
@@ -75,11 +77,11 @@ function drawDiamond(x, y, angle, color, size) {
 
 
 function drawCube(x, y, size, color) {
-    drawDiamond(x, y, Math.PI/6, color, size)
-    drawDiamond(x, y, Math.PI/6, "rgba(255, 255, 255, 0.3)", size)
-    drawDiamond(x, y, 5*Math.PI/6, color, size)
-    drawDiamond(x, y, 5*Math.PI/6, "rgba(0, 0, 0, 0.4)", size)
-    drawDiamond(x, y, 3*Math.PI/2, color, size)
+    drawDiamond(x, y, Math.PI/6, size, color)
+    drawDiamond(x, y, Math.PI/6, size, "rgba(255, 255, 255, 0.3)")
+    drawDiamond(x, y, 5*Math.PI/6, size, color)
+    drawDiamond(x, y, 5*Math.PI/6, size, "rgba(0, 0, 0, 0.4)")
+    drawDiamond(x, y, 3*Math.PI/2, size, color)
 }
 
 
@@ -183,6 +185,10 @@ drawFrame()
 
 function gameLoop(timestamp) {
 
+    if (gameStartTime == undefined) {
+        gameStartTime = timestamp
+    }
+
     if (prevGameTimeStamp == undefined) {
         prevGameTimeStamp = timestamp
     }
@@ -267,11 +273,15 @@ function gameLoop(timestamp) {
         currentTileIndex--
     }
 
+    score = Math.round((timestamp - gameStartTime)/100)
+    scoreElement.innerText = score
+
     drawFrame()
     
     if (gameOver) {
         requestAnimationFrame(gameOverAnimation)
         prevGameTimeStamp = undefined
+        gameStartTime = undefined
     }
     else {
         prevGameTimeStamp = timestamp
