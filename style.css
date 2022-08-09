@@ -24,15 +24,17 @@ body {
 
 #menu button {
     height: 2rem;
+    width: 6rem;
     padding-left: 1rem;
     padding-right: 1rem;
     margin: 0.2rem;
     font-size: 1rem;
     border-radius: 0.5rem;
+    color: black;
+    border-color: black;
 }
 
 .highlightedBtn {
-    /* font-weight: 600; */
     border-width: 0.2rem;
 }
 
@@ -57,3 +59,11 @@ body {
     text-align: center;
     font-size: 2rem;
 }
+
+/* For mobile phones: */
+@media (max-width: 40rem) {
+    #btns {
+        display: flex;
+        flex-direction: column;
+    }
+  }

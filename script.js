@@ -155,7 +155,7 @@ function gameOverAnimation(timestamp) {
 }
 
 
-window.addEventListener("keypress", () => {
+function handleInput() {
     if (enableGenerateNewMap) {
         enableGenerateNewMap = false
         enableStartGame = true
@@ -172,7 +172,11 @@ window.addEventListener("keypress", () => {
     else if (!gameOver) {
         playerDirection *= -1
     }
-})
+}
+
+
+window.addEventListener("keypress", handleInput)
+canvas.addEventListener("touchstart", handleInput)
 
 
 window.addEventListener("resize", () => {
