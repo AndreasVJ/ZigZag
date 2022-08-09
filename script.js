@@ -1,4 +1,5 @@
 const scoreElement = document.getElementById("score")
+
 const canvas = document.getElementById("canvas")
 const ctx = canvas.getContext("2d")
 
@@ -7,6 +8,8 @@ let enableStartGame = true
 let gameOver = true
 
 let score = 0
+
+let gameSpeedFactor = 3
 
 const heightTileSizeAspectRatio = 10
 const numberOfTiles = canvas.height/(canvas.height/heightTileSizeAspectRatio*Math.sin(Math.PI/6)) + 4
@@ -48,7 +51,7 @@ function resize() {
 
     tileSize = canvas.height / heightTileSizeAspectRatio
     playerSize = tileSize / 4
-    scrollSpeed = canvas.height * tileSize / canvas.height * 0.003
+    scrollSpeed = canvas.height * tileSize / canvas.height * 0.001 * gameSpeedFactor
 
 
     x = canvas.width / 2
@@ -178,6 +181,33 @@ window.addEventListener("resize", () => {
         drawFrame()
     }
 })
+
+
+function changeHighlightedBtn(event) {
+    document.getElementsByClassName("highlightedBtn")[0].classList.remove("highlightedBtn")
+    event.target.classList.add("highlightedBtn")
+}
+
+document.getElementById("easyBtn").onclick = (event) => {
+    changeHighlightedBtn(event)
+    gameSpeedFactor = 2.5
+    scrollSpeed = canvas.height * tileSize / canvas.height * 0.001 * gameSpeedFactor
+}
+document.getElementById("mediumBtn").onclick = (event) => {
+    changeHighlightedBtn(event)
+    gameSpeedFactor = 3
+    scrollSpeed = canvas.height * tileSize / canvas.height * 0.001 * gameSpeedFactor
+}
+document.getElementById("hardBtn").onclick = (event) => {
+    changeHighlightedBtn(event)
+    gameSpeedFactor = 3.5
+    scrollSpeed = canvas.height * tileSize / canvas.height * 0.001 * gameSpeedFactor
+}
+document.getElementById("insaneBtn").onclick = (event) => {
+    changeHighlightedBtn(event)
+    gameSpeedFactor = 4
+    scrollSpeed = canvas.height * tileSize / canvas.height * 0.001 * gameSpeedFactor
+}
 
 
 drawFrame()
