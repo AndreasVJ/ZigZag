@@ -188,10 +188,7 @@ window.addEventListener("resize", () => {
 // Prevent scrolling on iOS
 document.body.addEventListener('touchmove', function(event) {
     event.preventDefault()
-}, {
-    passive: false,
-    useCapture: false
-})
+}, {passive: false, useCapture: false})
 
 
 function changeHighlightedBtn(event) {
