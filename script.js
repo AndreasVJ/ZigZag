@@ -178,12 +178,19 @@ function handleInput() {
 window.addEventListener("keypress", handleInput)
 canvas.addEventListener("touchstart", handleInput)
 
-
 window.addEventListener("resize", () => {
     if (gameOver) {
         resize()
         drawFrame()
     }
+})
+
+// Prevent scrolling on iOS
+document.body.addEventListener('touchmove', function(event) {
+    event.preventDefault()
+}, {
+    passive: false,
+    useCapture: false
 })
 
 
