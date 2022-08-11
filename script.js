@@ -225,6 +225,7 @@ function gameLoop(timestamp) {
 
     if (gameStartTime == undefined) {
         gameStartTime = timestamp
+        score = 0
     }
 
     if (prevGameTimeStamp == undefined) {
@@ -311,8 +312,9 @@ function gameLoop(timestamp) {
         currentTileIndex--
     }
 
-    score = Math.round((timestamp - gameStartTime)/100)
-    scoreElement.innerText = score
+    // Score equals the number of tiles traveled
+    score +=  scrollSpeed * elapsedTime / (tileSize/2)
+    scoreElement.innerText = Math.round(score)
 
     drawFrame()
     
